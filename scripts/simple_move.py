@@ -50,10 +50,10 @@ class SimpleMove(Node):
     def waiting_loop(self):
         # サブスクライバーが接続されるのを待つループ。接続されるまでは何もしない。
         if self.pub_cmd_vel.get_subscription_count() == 0:
-            self.get_logger().info("Waiting for subscriber...", throttle_duration_sec=1.0)
+            self.get_logger().info('Waiting for subscriber...', throttle_duration_sec=1.0)
             return
         self.destroy_timer(self.timer)
-        self.get_logger().info("Subscriber connected. Starting control loop.")
+        self.get_logger().info('Subscriber connected. Starting control loop.')
         self.start_time = self.get_clock().now()
         self.timer = self.create_timer(
             0.05, self.control_loop)  # コントロールループに切り替える
@@ -79,7 +79,7 @@ class SimpleMove(Node):
         #    msg.linear.x = 0.2  # 並進速度(m/s)
         #    msg.angular.z = math.radians(30)  # 旋回角速度(ラジアン/s)
         else:
-            self.get_logger().info("Target time reached. Stopping.")
+            self.get_logger().info('Target time reached. Stopping.')
             self.pub_cmd_vel.publish(msg)  # 停止指令を送る
             raise KeyboardInterrupt()     # 終了
         self.pub_cmd_vel.publish(msg)
