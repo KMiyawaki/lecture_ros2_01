@@ -34,12 +34,12 @@ class NavCommander(Node):
         # 巡回したいウェイポイントの定義
         poses = []
         for p in [(2.67, 0.369), (7.32, 0.394), (7.05, 1.91), (4.3, 2.6)]:
-            poses.append(pose_stamped_from(p[0], p[1], 0.0))
+            poses.append(pose_stamped_from(
+                p[0], p[1], 0.0, self.get_clock().now().to_msg()))
         return poses
 
     def amcl_pose_callback(self, msg):
         self.pose = pose2d_from_amcl(msg)
-        
 
     def start_navigation(self):
         if not self.nav_client.wait_for_server(timeout_sec=5.0):
