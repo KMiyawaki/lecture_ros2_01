@@ -44,7 +44,26 @@ ros2 run lecture_ros2_01 simple_navigation.py
 しかし、長距離の自律移動では、逐一停止させることはできません。
 ゴールまでの距離が一定範囲内に入ったら次の目標を送信する必要があります。
 
-[FollowPath](https://docs.nav2.org/configuration/packages/bt-plugins/actions/FollowPath.html)を使うこともかんがえられますが、これは障害物回避をしません。
+<!-- [FollowPath](https://docs.nav2.org/configuration/packages/bt-plugins/actions/FollowPath.html)を使うこともかんがえられますが、これは障害物回避をしません。-->
 
 また、横断歩道など特定のウェイポイントに来たら停止するなどの制御も必要となります。
-挑戦してみてください。
+
+## basic_navigator_sample_01.py
+
+シミュレータの`Nav`ボタンでナビゲーションを起動してから実行してください。
+シミュレータは再起動してから実行した方がよいです。
+
+シミュレータの場合はVSCode上で`Ctrl+Shigt+@`でコマンドターミナルを表示し、以下のコマンドを入力して`Enter`キーを押します。
+
+```shell
+ros2 run lecture_ros2_01 basic_navigator_sample_01.py
+```
+
+`simple_navigation.py`では、自律移動のために様々な複雑なコードを記述していました。
+`basic_navigator_sample_01.py`で使用している`BasicNavigator`はそれらの処理を隠蔽し、直感的にプログラムできるようにしてくれるクラスです。
+
+ただし、`BasicNavigator`を他のセンサのデータ処理をしながら使う場合は別スレッドで動かす必要があります。
+排他制御には注意してください。
+サンプルでは基本的にセンサデータのコールバックと、メインスレッドではメッセージの参照のコピーしかしていませんので、スレッドセーフです。
+
+また、このサンプルでは、自律移動後に少し前進するなど実行したい処理を逐次的に記述可能となっています。
