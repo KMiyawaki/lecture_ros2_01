@@ -44,5 +44,7 @@ ros2 run lecture_ros2_01 simple_navigation.py
 しかし、長距離の自律移動では、逐一停止させることはできません。
 ゴールまでの距離が一定範囲内に入ったら次の目標を送信する必要があります。
 
+[FollowPath](https://docs.nav2.org/configuration/packages/bt-plugins/actions/FollowPath.html)を使うこともかんがえられますが、これは障害物回避をしません。
+
 また、横断歩道など特定のウェイポイントに来たら停止するなどの制御も必要となります。
 挑戦してみてください。
