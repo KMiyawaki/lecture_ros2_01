@@ -12,7 +12,6 @@ from nav_msgs.msg import Odometry
 from oit_robot_utils.pose_conversions import (pose2d_from_amcl,
                                               pose_stamped_from)
 from rclpy.callback_groups import ReentrantCallbackGroup
-from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
@@ -67,8 +66,9 @@ class NavCommander(Node):
             self.get_logger().info('Waiting for subscriber...', throttle_duration_sec=1.0)
             rate.sleep()
 
-        self.get_logger().info('目標を送信')
-        self.nav.goToPose(pose_stamped_from(2.67, 0.369, 0.0,
+        self.get_logger().info('目標(1)を送信')
+        target = [2.67, 0.369, 0.0]
+        self.nav.goToPose(pose_stamped_from(target[0], target[1], target[2],
                           self.get_clock().now().to_msg()))  # 最初の目標を送る
         self.get_logger().info('送信完了。ナビゲーション開始')
 
@@ -79,19 +79,34 @@ class NavCommander(Node):
                 pose_2d = pose2d_from_amcl(self.amcl_pose)
                 self.get_logger().info(
                     f'現在位置: x={pose_2d.x:.2f}, y={pose_2d.y:.2f}, theta={pose_2d.theta:.2f}')
+
+            d = self.nav.getFeedback().distance_remaining
+            self.get_logger().info(f'目標までの距離: {d:.2f} m')
+            if d < 1.5:  # 1.5m以内に入ったら次の目標へ
+                self.get_logger().info('目標(1)に到達')
+                break
             rate.sleep()
         self.get_logger().info('ナビゲーション終了')
 
-        # 終わった後にすこしだけ前進してみる。
-        self.get_logger().info('前進')
-        start_time = self.get_clock().now()
-        duration = Duration(seconds=5)
-        # 10秒経過したらループを抜ける
-        while (self.get_clock().now() - start_time) <= duration and rclpy.ok():
-            twist = Twist()
-            twist.linear.x = 0.2
-            self.pub_cmd_vel.publish(twist)
-        self.pub_cmd_vel.publish(Twist())  # 止まる
+        self.get_logger().info('目標(2)を送信')
+        target = [7.32, 0.394, 0.0]
+        self.nav.goToPose(pose_stamped_from(target[0], target[1], target[2],
+                          self.get_clock().now().to_msg()))  # 最初の目標を送る
+        self.get_logger().info('送信完了。ナビゲーション開始')
+
+        # 自律移動させる。
+        while not self.nav.isTaskComplete() and rclpy.ok():
+            # 参照の読み取りだけなのでスレッドセーフ
+            if self.amcl_pose:
+                pose_2d = pose2d_from_amcl(self.amcl_pose)
+                self.get_logger().info(
+                    f'現在位置: x={pose_2d.x:.2f}, y={pose_2d.y:.2f}, theta={pose_2d.theta:.2f}')
+
+            d = self.nav.getFeedback().distance_remaining
+            self.get_logger().info(f'目標までの距離: {d:.2f} m')
+            rate.sleep()
+        self.get_logger().info('送信完了。ナビゲーション終了')
+
         self.get_logger().info('ユーザー処理ループ終了')
         raise KeyboardInterrupt()  # 終了
 
